@@ -343,7 +343,9 @@ route();
   addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); ev=e; box.classList.remove('hidden'); });
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
   if(ios){ txt.textContent='Tocca Condividi e poi «Aggiungi alla schermata Home»'; btn.classList.add('hidden'); box.classList.remove('hidden'); }
-  btn.onclick = async ()=>{ if(!ev) return; ev.prompt(); try{ await ev.userChoice; }catch(e){} ev=null; box.classList.add('hidden'); };
+  // se Chrome non offre l'installazione automatica, mostra comunque il cartello con le istruzioni
+  if(!ios) setTimeout(()=>{ if(!ev) box.classList.remove('hidden'); }, 1500);
+  btn.onclick = async ()=>{ if(!ev){ txt.textContent='Tocca ⋮ in alto a destra e poi «Installa app» o «Aggiungi a schermata Home»'; btn.classList.add('hidden'); return; } ev.prompt(); try{ await ev.userChoice; }catch(e){} ev=null; box.classList.add('hidden'); };
   document.getElementById('instx').onclick = ()=>{ box.classList.add('hidden'); store.set('noinst', true); };
   addEventListener('appinstalled', ()=>box.classList.add('hidden'));
 })();
