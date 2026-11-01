@@ -105,6 +105,10 @@ a{color:inherit}
 .pages img{display:block;width:100%;height:auto;background:#fff;border-radius:6px;margin:12px 0;
   box-shadow:0 1px 4px rgba(0,0,0,.12)}
 html.dark .pages img{filter:invert(.9) hue-rotate(180deg)}
+.home{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:34px;text-decoration:none;background:var(--accent);color:#fff;
+  border-radius:14px;padding:15px;font-size:18px;font-weight:600}
+.home svg{width:22px;height:22px}
+html.dark .home{color:#1a1715}
 .nav{display:flex;gap:10px;margin-top:30px}
 .nav a{flex:1;min-width:0;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
 .nav a.nx{text-align:right}
@@ -271,7 +275,6 @@ function renderList(){
     ].filter(x=>x[1]);
     const pasq = tempoPasquale(new Date());
     const angelus = find(c=>c.title==='Angelus'), regina = find(c=>c.title.startsWith('Reg')), christe = find(c=>c.name==='CHRISTE CUNCTORUM');
-    oggi.push(['Preghiera', pasq ? regina : angelus]);
     let h = '';
     if(oggi.length){
       h += `<div class="today"><div class="lab">Oggi</div><div class="day">${g.charAt(0)+g.slice(1).toLowerCase()}</div>`+
@@ -351,10 +354,7 @@ function renderCanto(c){
     <div class="text pane" data-p="testo">${main.map(blockHTML).join('')}</div>
     <div class="text pane" data-p="traduzione">${trad.map(blockHTML).join('')}</div>
     <div class="pages pane" data-p="spartito" id="vs"></div>
-    <div class="nav">
-      ${prev?`<a href="#${prev.id}"><div class="k">‹ Precedente</div><div class="v">${esc(prev.title)}</div></a>`:'<span style="flex:1"></span>'}
-      ${next?`<a class="nx" href="#${next.id}"><div class="k">Successivo ›</div><div class="v">${esc(next.title)}</div></a>`:'<span style="flex:1"></span>'}
-    </div>`;
+    <a class="home" href="#">${ICON.back} Torna all'indice</a>`;
   const show = k=>{
     m.querySelectorAll('.pane').forEach(p=>p.classList.toggle('hidden', p.dataset.p!==k));
     m.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on', x.dataset.v===k));
@@ -367,13 +367,7 @@ function renderCanto(c){
   m.querySelectorAll('.tabs button').forEach(bt=>bt.onclick=()=>{ view = bt.dataset.v; store.set('view', view); show(view); });
   document.getElementById('fm').onclick = ()=>{ fs = Math.max(15, fs-2); store.set('fs', fs); applyPrefs(); };
   document.getElementById('fp').onclick = ()=>{ fs = Math.min(36, fs+2); store.set('fs', fs); applyPrefs(); };
-  // scorrimento laterale per passare al canto vicino
-  let x0=null, y0=null;
-  m.ontouchstart = e=>{ x0=e.touches[0].clientX; y0=e.touches[0].clientY; };
-  m.ontouchend = e=>{
-    if(x0===null) return; const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0; x0=null;
-    if(Math.abs(dx)>90 && Math.abs(dx)>2.5*Math.abs(dy)){ const t = dx<0?next:prev; if(t) location.hash=t.id; }
-  };
+
 }
 
 let lastHome = 0;
