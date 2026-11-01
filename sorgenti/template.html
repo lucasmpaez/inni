@@ -30,7 +30,7 @@ body{font-family:var(--sans);min-height:100vh;
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
 a{color:inherit}
-.wrap{max-width:680px;margin:0 auto;padding:0 16px 48px}
+.wrap{max-width:680px;margin:0 auto;padding:0 16px 110px}
 
 /* barra superiore */
 .top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
@@ -105,6 +105,13 @@ html.dark .pages img{filter:invert(.9) hue-rotate(180deg)}
 .nav a.nx{text-align:right}
 .nav .k{font-size:12px;color:var(--muted)}
 .nav .v{font-family:var(--serif);font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inst{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:9;max-width:656px;margin:0 auto;
+  display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 6px 10px 16px;
+  box-shadow:0 6px 24px rgba(0,0,0,.18)}
+.inst .it{flex:1;min-width:0;display:flex;flex-direction:column;font-size:14px}
+.inst .it span{color:var(--muted);font-size:13px}
+.ibtn{background:var(--accent);color:#fff;border-radius:10px;padding:9px 16px;font-weight:600;font-size:15px}
+html.dark .ibtn{color:#1a1715}
 .hidden{display:none!important}
 </style>
 </head>
@@ -113,6 +120,11 @@ html.dark .pages img{filter:invert(.9) hue-rotate(180deg)}
   <div class="bar" id="bar"></div>
 </header>
 <main class="wrap" id="main"></main>
+<div class="inst hidden" id="inst">
+  <div class="it"><b>Installa l'app</b><span id="insttxt">Sul telefono, anche senza internet</span></div>
+  <button class="ibtn" id="instbtn">Installa</button>
+  <button class="ib" id="instx" aria-label="Chiudi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</div>
 
 <script>
 const CANTI = /*__CANTI__*/null;
@@ -321,6 +333,20 @@ function route(){
 addEventListener('hashchange', route);
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', ()=>{ if(dark===null){ applyPrefs(); route(); } });
 route();
+// pulsante "Installa"
+(function(){
+  const box=document.getElementById('inst'), btn=document.getElementById('instbtn'), txt=document.getElementById('insttxt');
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  const ospitato = location.protocol==='https:' && !/claude\.ai|claudeusercontent/.test(location.host);
+  if(standalone || !ospitato || store.get('noinst', false)) return;
+  let ev=null;
+  addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); ev=e; box.classList.remove('hidden'); });
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(ios){ txt.textContent='Tocca Condividi e poi «Aggiungi alla schermata Home»'; btn.classList.add('hidden'); box.classList.remove('hidden'); }
+  btn.onclick = async ()=>{ if(!ev) return; ev.prompt(); try{ await ev.userChoice; }catch(e){} ev=null; box.classList.add('hidden'); };
+  document.getElementById('instx').onclick = ()=>{ box.classList.add('hidden'); store.set('noinst', true); };
+  addEventListener('appinstalled', ()=>box.classList.add('hidden'));
+})();
 if('serviceWorker' in navigator && location.protocol==='https:' && !/claude\.ai|claudeusercontent/.test(location.host)){ try{ navigator.serviceWorker.register('sw.js'); }catch(e){} }
 </script>
 </body>
