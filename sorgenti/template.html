@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7a1f1f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Inni">
+<title>Inni</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf7f2; --card:#fffdf9; --ink:#2b2622; --muted:#7d746b; --line:#e8e1d6;
+  --accent:#8a2424; --accent-soft:#f3e6e2; --trad:#5f5850;
+  --fs:20px;
+  --serif:"EB Garamond", Georgia, "Times New Roman", serif;
+  --sans:Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+html.dark{
+  --bg:#171513; --card:#211e1b; --ink:#ece6dd; --muted:#9a9187; --line:#34302b;
+  --accent:#e08a7c; --accent-soft:#3a2522; --trad:#bdb4a9;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:var(--sans);min-height:100vh;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+a{color:inherit}
+.wrap{max-width:680px;margin:0 auto;padding:0 16px 48px}
+
+/* barra superiore */
+.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+  padding-top:env(safe-area-inset-top);margin-top:calc(-1 * env(safe-area-inset-top))}
+.top .bar{max-width:680px;margin:0 auto;display:flex;align-items:center;gap:6px;padding:10px 12px;min-height:56px}
+.top h1{font-family:var(--serif);font-weight:600;font-size:26px;margin:0 0 0 4px;letter-spacing:.06em;flex:1}
+.top .ttl{flex:1;min-width:0;font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib{width:42px;height:42px;border-radius:21px;display:grid;place-items:center;flex:none;color:var(--muted)}
+.ib:active{background:var(--accent-soft)}
+.ib svg{width:22px;height:22px}
+.ib.txt{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink)}
+
+/* ricerca */
+.search{position:relative;margin:14px 0 6px}
+.search input{width:100%;font:inherit;font-size:17px;padding:13px 40px 13px 44px;border-radius:14px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);outline:none}
+.search input::-webkit-search-cancel-button{display:none;-webkit-appearance:none}
+.search input:focus{border-color:var(--accent)}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:var(--muted)}
+.search .clr{position:absolute;right:6px;top:50%;transform:translateY(-50%);display:none}
+.search.has .clr{display:grid}
+
+/* oggi */
+.today{margin:16px 0 8px;background:var(--accent-soft);border-radius:16px;padding:14px 16px}
+.today .lab{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.today .day{font-family:var(--serif);font-size:24px;margin:2px 0 6px}
+.today a{display:flex;align-items:baseline;gap:10px;text-decoration:none;padding:7px 0}
+.today a .o{font-size:13px;color:var(--muted);width:78px;flex:none}
+.today a .t{font-family:var(--serif);font-size:20px}
+
+/* indice */
+.sec{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:26px 4px 6px}
+.list{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.item{display:flex;align-items:center;gap:12px;padding:12px 14px;text-decoration:none;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item:active{background:var(--accent-soft)}
+.item .m{flex:1;min-width:0}
+.item .t{font-family:var(--serif);font-size:20px;line-height:1.2}
+.item .s{font-size:13px;color:var(--muted);margin-top:2px}
+.item .snip{font-size:14px;color:var(--muted);margin-top:4px;font-family:var(--serif);font-style:italic}
+.item .snip mark{background:none;color:var(--accent);font-style:normal;font-weight:600}
+.item .p{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.empty{text-align:center;color:var(--muted);padding:40px 0}
+.foot{text-align:center;color:var(--muted);font-size:13px;margin-top:30px;line-height:1.7}
+.foot a{color:var(--accent)}
+
+/* canto */
+.head{margin:22px 0 4px}
+.head .s{font-size:13px;color:var(--accent);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.head h2{font-family:var(--serif);font-weight:600;font-size:32px;line-height:1.1;margin:4px 0 0}
+.head .pg{font-size:13px;color:var(--muted);margin-top:6px}
+.tabs{display:flex;gap:4px;background:var(--line);padding:3px;border-radius:12px;margin:16px 0 6px}
+.tabs button{flex:1;padding:8px;border-radius:9px;font-size:14px;font-weight:500;color:var(--muted)}
+.tabs button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.text{font-family:var(--serif);font-size:var(--fs);line-height:1.45}
+.blk{display:flex;gap:10px;margin:0 0 .9em}
+.blk .n{width:1.6em;flex:none;text-align:right;color:var(--accent);font-size:.8em;padding-top:.15em;font-family:var(--sans);font-weight:500}
+.blk .ls{flex:1;min-width:0}
+.blk .l{padding-left:1.2em;text-indent:-1.2em}
+.blk.prose .l{padding-left:0;text-indent:0}
+.l.it{font-style:italic}
+.l.rub{color:var(--accent);font-style:italic;text-align:center}
+.blk.trad{color:var(--trad)}
+.blk.ant{background:var(--accent-soft);border-radius:12px;padding:10px 12px 10px 0}
+.mk{color:var(--accent);font-family:var(--sans);font-size:.85em;margin-right:.35em}
+.h3{font-family:var(--sans);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:1.6em 0 .7em}
+.pages img{display:block;width:100%;height:auto;background:#fff;border-radius:6px;margin:12px 0;
+  box-shadow:0 1px 4px rgba(0,0,0,.12)}
+html.dark .pages img{filter:invert(.9) hue-rotate(180deg)}
+.nav{display:flex;gap:10px;margin-top:30px}
+.nav a{flex:1;min-width:0;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+.nav a.nx{text-align:right}
+.nav .k{font-size:12px;color:var(--muted)}
+.nav .v{font-family:var(--serif);font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="bar" id="bar"></div>
+</header>
+<main class="wrap" id="main"></main>
+
+<script>
+const CANTI = /*__CANTI__*/null;
+const IMGS = /*__IMGS__*/null;
+const AUDIO = "https://drive.google.com/drive/folders/1ak3Kv8y1ltFpNXcO46MDwW5sgQFkRUjz";
+const SECS = ["Inni del tempo ordinario","Inni di altri tempi liturgici","Cantici e altri inni","Appendice","Preghiere"];
+const GIORNI = ["DOMENICA","LUNEDÌ","MARTEDÌ","MERCOLEDÌ","GIOVEDÌ","VENERDÌ","SABATO"];
+function pasqua(y){ // data di Pasqua (calendario gregoriano)
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
+    h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),
+    mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1; return new Date(y,mo-1,da);
+}
+function tempoPasquale(d){ // da Pasqua a Pentecoste inclusa
+  const t=new Date(d.getFullYear(),d.getMonth(),d.getDate()), p=pasqua(d.getFullYear());
+  const diff=(t-p)/864e5; return diff>=0 && diff<=49;
+}
+const byId = Object.fromEntries(CANTI.map(c=>[c.id,c]));
+
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem('inni.'+k); return v===null?d:JSON.parse(v);}catch(e){return d;} },
+  set(k,v){ try{ localStorage.setItem('inni.'+k, JSON.stringify(v)); }catch(e){} }
+};
+let fs = store.get('fs', 20), dark = store.get('dark', null), view = store.get('view', 'testo'), query = '';
+function applyPrefs(){
+  document.documentElement.style.setProperty('--fs', fs+'px');
+  const d = dark===null ? matchMedia('(prefers-color-scheme: dark)').matches : dark;
+  document.documentElement.classList.toggle('dark', d);
+}
+applyPrefs();
+
+const esc = s => s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[’']/g,"'");
+const ICON = {
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
+  sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
+};
+
+// testo completo per la ricerca
+const fullText = c => [c.title, c.sub, ...c.blocks.flatMap(b=>(b.lines||[]).map(l=>l.t))].join('\n');
+CANTI.forEach(c=>{ c._t = fullText(c); c._n = norm(c._t); });
+
+function themeBtn(){
+  const isDark = document.documentElement.classList.contains('dark');
+  return `<button class="ib" id="theme" aria-label="Tema">${isDark?ICON.sun:ICON.moon}</button>`;
+}
+function bindTheme(){
+  document.getElementById('theme').onclick = ()=>{
+    dark = !document.documentElement.classList.contains('dark'); store.set('dark', dark); applyPrefs(); route();
+  };
+}
+
+function itemHTML(c, snip){
+  return `<a class="item" href="#${c.id}"><div class="m"><div class="t">${esc(c.title)}</div>`+
+    (c.sub?`<div class="s">${esc(c.sub)}</div>`:'')+(snip?`<div class="snip">${snip}</div>`:'')+
+    `</div><div class="p">${c.page}</div></a>`;
+}
+
+function renderHome(){
+  document.getElementById('bar').innerHTML = `<h1>INNI</h1>${themeBtn()}`;
+  bindTheme();
+  const m = document.getElementById('main');
+  m.innerHTML = `
+    <div class="search${query?' has':''}" id="sb">${ICON.search}
+      <input id="q" type="search" placeholder="Cerca titolo, parole o pagina…" value="${esc(query)}" autocomplete="off" enterkeyhint="search">
+      <button class="ib clr" id="clr" aria-label="Cancella">${ICON.x}</button>
+    </div>
+    <div id="res"></div>`;
+  const q = document.getElementById('q');
+  q.oninput = ()=>{ query = q.value; document.getElementById('sb').classList.toggle('has', !!query); renderList(); };
+  document.getElementById('clr').onclick = ()=>{ query=''; q.value=''; document.getElementById('sb').classList.remove('has'); renderList(); q.focus(); };
+  renderList();
+}
+
+function renderList(){
+  const res = document.getElementById('res');
+  const q = norm(query.trim());
+  if(!q){
+    const g = GIORNI[new Date().getDay()];
+    const sab = g==='SABATO';
+    const find = f=>CANTI.find(f);
+    const oggi = [
+      ['Lodi', find(c=>c.name===g && c.ora==='Lodi')],
+      ['Ora media', sab ? find(c=>c.name==='OMNI DIE') : find(c=>c.name==='ORA MEDIA')],
+      ['Vespri', find(c=>c.name===g && c.ora==='Vespri')],
+      ['Compieta', sab ? find(c=>c.name==='O SPES MEA CARA') : find(c=>c.name==='COMPIETA' && c.sec!=='Preghiere')]
+    ].filter(x=>x[1]);
+    const pasq = tempoPasquale(new Date());
+    const angelus = find(c=>c.title==='Angelus'), regina = find(c=>c.title.startsWith('Reg')), christe = find(c=>c.name==='CHRISTE CUNCTORUM');
+    oggi.push(['Preghiera', pasq ? regina : angelus]);
+    let h = '';
+    if(oggi.length){
+      h += `<div class="today"><div class="lab">Oggi</div><div class="day">${g.charAt(0)+g.slice(1).toLowerCase()}</div>`+
+        oggi.map(([o,c])=>`<a href="#${c.id}"><span class="o">${esc(o)}</span><span class="t">${esc(c.title)}</span></a>`).join('')+
+        `</div>`;
+    }
+    const usati = [christe, pasq ? regina : angelus, pasq ? angelus : regina].filter(Boolean);
+    h += `<div class="sec">Più usati</div><div class="list">${usati.map(c=>itemHTML(c)).join('')}</div>`;
+    for(const s of SECS){
+      const cs = CANTI.filter(c=>c.sec===s);
+      h += `<div class="sec">${esc(s)}</div><div class="list">${cs.map(c=>itemHTML(c)).join('')}</div>`;
+    }
+    h += `<div class="foot"><a href="${AUDIO}" target="_blank" rel="noopener">File audio (Google Drive)</a><br>Testi dal libretto «Inni»</div>`;
+    res.innerHTML = h; return;
+  }
+  // ricerca: numero di pagina o parole
+  let hits = [];
+  if(/^\d+$/.test(q)){
+    const n = +q;
+    hits = CANTI.filter(c=>c.page===n || (c.pdfpages||[]).some(p=>p-1===n)).map(c=>[c,'']);
+  }
+  const words = q.split(/\s+/).filter(Boolean);
+  for(const c of CANTI){
+    if(hits.some(h=>h[0]===c)) continue;
+    if(words.every(w=>c._n.includes(w))){
+      let snip = '';
+      if(!words.every(w=>norm(c.title+' '+c.sub).includes(w))){
+        const lines = c._t.split('\n'); const nl = lines.map(norm);
+        const i = nl.findIndex(l=>l.includes(words[0]));
+        if(i>=0){
+          const L = lines[i]; const j = nl[i].indexOf(words[0]);
+          // nfd può cambiare la lunghezza: ricava la posizione sul testo originale
+          let a = 0, k = 0; while(k < j && a < L.length){ k += norm(L[a]).length; a++; }
+          let b = a, kk = 0; while(kk < words[0].length && b < L.length){ kk += norm(L[b]).length; b++; }
+          snip = esc(L.slice(0,a)) + '<mark>' + esc(L.slice(a,b)) + '</mark>' + esc(L.slice(b));
+        }
+      }
+      const tn = norm(c.title), sn = norm(c.sub+' '+c.name);
+      const score = tn.startsWith(q) ? 0 : words.every(w=>tn.includes(w)) ? 1 : words.every(w=>(tn+' '+sn).includes(w)) ? 2 : 3;
+      hits.push([c, snip, score]);
+    }
+  }
+  hits = hits.map((h,ix)=>[h[0],h[1],h[2]===undefined?-1:h[2],ix]).sort((x,y)=>x[2]-y[2]||x[3]-y[3]);
+  res.innerHTML = hits.length
+    ? `<div class="sec">${hits.length} risultat${hits.length===1?'o':'i'}</div><div class="list">${hits.map(([c,s])=>itemHTML(c,s)).join('')}</div>`
+    : `<div class="empty">Nessun risultato</div>`;
+}
+
+function blockHTML(b){
+  if(b.head) return `<div class="h3">${esc(b.head)}</div>`;
+  const prose = b.lines.some(l=>l.t.length>70);
+  const cls = ['blk', b.trad?'trad':'', b.ant?'ant':'', prose?'prose':''].join(' ');
+  const ls = b.lines.map(l=>`<div class="l${l.it?' it':''}${l.rub?' rub':''}">${l.mark?`<span class="mk">${l.mark}.</span>`:''}${esc(l.t)}</div>`).join('');
+  return `<div class="${cls}"><div class="n">${b.n?b.n+'.':''}</div><div class="ls">${ls}</div></div>`;
+}
+
+function renderCanto(c){
+  const i = CANTI.indexOf(c);
+  document.getElementById('bar').innerHTML =
+    `<a class="ib" href="#" aria-label="Indice">${ICON.back}</a><div class="ttl">${esc(c.title)}</div>`+
+    `<button class="ib txt" id="fm" aria-label="Testo più piccolo" style="font-size:15px">A</button>`+
+    `<button class="ib txt" id="fp" aria-label="Testo più grande">A</button>${themeBtn()}`;
+  bindTheme();
+  const ti = c.blocks.findIndex(b=>b.head==='Traduzione');
+  const main = ti<0 ? c.blocks : c.blocks.slice(0,ti);
+  const trad = ti<0 ? [] : c.blocks.slice(ti+1).map(b=>Object.assign({}, b, {trad:0, lines:(b.lines||[]).map(l=>Object.assign({}, l, {it:0}))}));
+  const tabs = [['testo','Testo']];
+  if(trad.length) tabs.push(['traduzione','Traduzione']);
+  if(c.pdfpages && c.pdfpages.length) tabs.push(['spartito','Spartito']);
+  const v = tabs.some(x=>x[0]===view) ? view : 'testo';
+  const prev = CANTI[i-1], next = CANTI[i+1];
+  const m = document.getElementById('main');
+  m.innerHTML = `
+    <div class="head">${c.sub?`<div class="s">${esc(c.sub)}</div>`:''}<h2>${esc(c.title)}</h2>
+      <div class="pg">${esc(c.sec)} · pag. ${c.page}</div></div>
+    ${tabs.length>1?`<div class="tabs">${tabs.map(([k,l])=>`<button data-v="${k}" class="${v===k?'on':''}">${l}</button>`).join('')}</div>`:''}
+    <div class="text pane" data-p="testo">${main.map(blockHTML).join('')}</div>
+    <div class="text pane" data-p="traduzione">${trad.map(blockHTML).join('')}</div>
+    <div class="pages pane" data-p="spartito" id="vs"></div>
+    <div class="nav">
+      ${prev?`<a href="#${prev.id}"><div class="k">‹ Precedente</div><div class="v">${esc(prev.title)}</div></a>`:'<span style="flex:1"></span>'}
+      ${next?`<a class="nx" href="#${next.id}"><div class="k">Successivo ›</div><div class="v">${esc(next.title)}</div></a>`:'<span style="flex:1"></span>'}
+    </div>`;
+  const show = k=>{
+    m.querySelectorAll('.pane').forEach(p=>p.classList.toggle('hidden', p.dataset.p!==k));
+    m.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on', x.dataset.v===k));
+    const vs = document.getElementById('vs');
+    if(k==='spartito' && !vs.innerHTML) vs.innerHTML = c.pdfpages.map(p=>`<img alt="Pagina ${p-1}" src="${IMGS[p]}">`).join('');
+    document.getElementById('fm').classList.toggle('hidden', k==='spartito');
+    document.getElementById('fp').classList.toggle('hidden', k==='spartito');
+  };
+  show(v);
+  m.querySelectorAll('.tabs button').forEach(bt=>bt.onclick=()=>{ view = bt.dataset.v; store.set('view', view); show(view); });
+  document.getElementById('fm').onclick = ()=>{ fs = Math.max(15, fs-2); store.set('fs', fs); applyPrefs(); };
+  document.getElementById('fp').onclick = ()=>{ fs = Math.min(36, fs+2); store.set('fs', fs); applyPrefs(); };
+  // scorrimento laterale per passare al canto vicino
+  let x0=null, y0=null;
+  m.ontouchstart = e=>{ x0=e.touches[0].clientX; y0=e.touches[0].clientY; };
+  m.ontouchend = e=>{
+    if(x0===null) return; const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0; x0=null;
+    if(Math.abs(dx)>90 && Math.abs(dx)>2.5*Math.abs(dy)){ const t = dx<0?next:prev; if(t) location.hash=t.id; }
+  };
+}
+
+let lastHome = 0;
+function route(){
+  const id = location.hash.slice(1);
+  const c = byId[id];
+  const m = document.getElementById('main');
+  m.ontouchstart = m.ontouchend = null;
+  if(c){ if(!document.querySelector('.pane')) lastHome = scrollY; renderCanto(c); scrollTo(0,0); }
+  else { renderHome(); scrollTo(0, lastHome); }
+}
+addEventListener('hashchange', route);
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', ()=>{ if(dark===null){ applyPrefs(); route(); } });
+route();
+if('serviceWorker' in navigator && location.protocol==='https:' && !/claude\.ai|claudeusercontent/.test(location.host)){ try{ navigator.serviceWorker.register('sw.js'); }catch(e){} }
+</script>
+</body>
+</html>
