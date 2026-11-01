@@ -1,5 +1,5 @@
 // Cache per l'uso senza connessione. Cambia VERSIONE a ogni aggiornamento.
-const VERSIONE = 'inni-v4';
+const VERSIONE = 'inni-v5';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSIONE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

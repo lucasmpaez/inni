@@ -161,7 +161,15 @@ html.dark .gok{color:#1a1715}
 const CANTI = /*__CANTI__*/null;
 const IMGS = /*__IMGS__*/null;
 const AUDIO = "https://drive.google.com/drive/folders/1ak3Kv8y1ltFpNXcO46MDwW5sgQFkRUjz";
-const SECS = ["Inni del tempo ordinario","Inni di altri tempi liturgici","Cantici e altri inni","Appendice","Preghiere"];
+const SECS = ["Inni durante l'anno","Inni di Avvento","Inni di Natale","Inni di Quaresima","Inni di Pasqua","Cantici e altri inni","Appendice","Preghiere"];
+// categorie: tempo ordinario e un gruppo per ogni tempo liturgico
+CANTI.forEach(c=>{
+  if(c.sec==='Inni del tempo ordinario') c.sec = "Inni durante l'anno";
+  else if(c.sec==='Inni di altri tempi liturgici'){
+    const t = {AVVENTO:'Avvento', NATALE:'Natale', QUARESIMA:'Quaresima', PASQUA:'Pasqua'}[c.name];
+    if(t){ c.sec = 'Inni di '+t; c.sub = c.ora; }
+  }
+});
 const GIORNI = ["DOMENICA","LUNEDÌ","MARTEDÌ","MERCOLEDÌ","GIOVEDÌ","VENERDÌ","SABATO"];
 function pasqua(y){ // data di Pasqua (calendario gregoriano)
   const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
