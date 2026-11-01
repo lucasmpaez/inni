@@ -112,6 +112,27 @@ html.dark .pages img{filter:invert(.9) hue-rotate(180deg)}
 .inst .it span{color:var(--muted);font-size:13px}
 .ibtn{background:var(--accent);color:#fff;border-radius:10px;padding:9px 16px;font-weight:600;font-size:15px}
 html.dark .ibtn{color:#1a1715}
+.guide{position:fixed;inset:0;z-index:20;background:rgba(20,15,12,.6);display:flex;align-items:flex-end;justify-content:center;
+  padding:16px 12px calc(16px + env(safe-area-inset-bottom))}
+.guide .arrow{position:fixed;top:calc(4px + env(safe-area-inset-top));right:6px;width:46px;color:#fff;animation:bob 1s ease-in-out infinite}
+.guide .arrow.down{top:auto;bottom:calc(8px + env(safe-area-inset-bottom));right:auto;left:calc(50% - 23px);transform:rotate(180deg);animation:bobd 1s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-10px)}}
+@keyframes bobd{0%,100%{transform:rotate(180deg)}50%{transform:rotate(180deg) translateY(-10px)}}
+.gcard{background:var(--card);color:var(--ink);border-radius:22px;padding:22px 20px 18px;width:100%;max-width:520px;max-height:82vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.gtitle{font-family:var(--serif);font-size:28px;font-weight:600;line-height:1.15}
+.gsub{font-size:17px;color:var(--muted);margin:6px 0 14px;line-height:1.4}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{counter-increment:s;display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line);font-size:19px;line-height:1.4}
+.steps li::before{content:counter(s);flex:none;width:38px;height:38px;border-radius:19px;background:var(--accent);color:#fff;
+  display:grid;place-items:center;font-weight:700;font-size:20px}
+html.dark .steps li::before{color:#1a1715}
+.steps b{font-weight:700}
+.chip{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--ink);border-radius:10px;padding:1px 9px;margin:2px 2px;font-weight:600;white-space:nowrap;vertical-align:middle}
+.chip svg{width:22px;height:22px}
+.gend{display:flex;align-items:center;gap:14px;background:var(--accent-soft);border-radius:14px;padding:12px;margin:8px 0 14px;font-size:17px;line-height:1.35}
+.gend img{width:56px;height:56px;border-radius:14px;flex:none}
+.gok{width:100%;background:var(--accent);color:#fff;border-radius:14px;padding:15px;font-size:19px;font-weight:600}
+html.dark .gok{color:#1a1715}
 .hidden{display:none!important}
 </style>
 </head>
@@ -120,6 +141,16 @@ html.dark .ibtn{color:#1a1715}
   <div class="bar" id="bar"></div>
 </header>
 <main class="wrap" id="main"></main>
+<div class="guide hidden" id="guide" role="dialog" aria-modal="true">
+  <div class="arrow" id="garrow"><svg viewBox="0 0 60 90" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M30 85V12M8 32L30 8l22 24"/></svg></div>
+  <div class="gcard">
+    <div class="gtitle">Come installare l'app</div>
+    <div class="gsub">Bastano 3 tocchi. Poi la trovi sul telefono come le altre app.</div>
+    <ol class="steps" id="gsteps"></ol>
+    <div class="gend"><img src="icon-192.png" alt=""><span>Alla fine vedrai questa icona sul telefono.</span></div>
+    <button class="gok" id="gok">Ho capito</button>
+  </div>
+</div>
 <div class="inst hidden" id="inst">
   <div class="it"><b>Installa l'app</b><span id="insttxt">Sul telefono, anche senza internet</span></div>
   <button class="ibtn" id="instbtn">Installa</button>
@@ -333,21 +364,45 @@ function route(){
 addEventListener('hashchange', route);
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', ()=>{ if(dark===null){ applyPrefs(); route(); } });
 route();
-// pulsante "Installa"
+// pulsante "Installa" e guida illustrata
 (function(){
   const box=document.getElementById('inst'), btn=document.getElementById('instbtn'), txt=document.getElementById('insttxt');
+  const guide=document.getElementById('guide'), steps=document.getElementById('gsteps'), arrow=document.getElementById('garrow');
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   const ospitato = location.protocol==='https:' && !/claude\.ai|claudeusercontent/.test(location.host);
-  if(standalone || !ospitato || store.get('noinst', false)) return;
-  let ev=null;
-  addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); ev=e; box.classList.remove('hidden'); });
+  if(standalone || !ospitato) return;
+  const DOTS='<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2.3"/><circle cx="12" cy="12" r="2.3"/><circle cx="12" cy="19" r="2.3"/></svg>';
+  const SHARE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v8h14v-8"/></svg>';
+  const PLUS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg>';
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  if(ios){ txt.textContent='Tocca Condividi e poi «Aggiungi alla schermata Home»'; btn.classList.add('hidden'); box.classList.remove('hidden'); }
-  // se Chrome non offre l'installazione automatica, mostra comunque il cartello con le istruzioni
-  if(!ios) setTimeout(()=>{ if(!ev) box.classList.remove('hidden'); }, 1500);
-  btn.onclick = async ()=>{ if(!ev){ txt.textContent='Tocca ⋮ in alto a destra e poi «Installa app» o «Aggiungi a schermata Home»'; btn.classList.add('hidden'); return; } ev.prompt(); try{ await ev.userChoice; }catch(e){} ev=null; box.classList.add('hidden'); };
+  let ev=null;
+  function apriGuida(){
+    if(ios){
+      steps.innerHTML = `<li><span>In basso, tocca il tasto <span class="chip">${SHARE} Condividi</span></span></li>
+        <li><span>Scorri e tocca <span class="chip">${PLUS} Aggiungi alla schermata Home</span></span></li>
+        <li><span>In alto a destra tocca <span class="chip">Aggiungi</span></span></li>`;
+      arrow.classList.add('down');
+    } else {
+      steps.innerHTML = `<li><span>In alto a destra tocca i <b>tre puntini</b> <span class="chip">${DOTS}</span> (dove indica la freccia)</span></li>
+        <li><span>Nel menu tocca <span class="chip">Installa app</span> oppure <span class="chip">Aggiungi a schermata Home</span></span></li>
+        <li><span>Conferma toccando <span class="chip">Installa</span></span></li>`;
+      arrow.classList.remove('down');
+    }
+    guide.classList.remove('hidden');
+  }
+  document.getElementById('gok').onclick = ()=>guide.classList.add('hidden');
+  guide.onclick = e=>{ if(e.target===guide) guide.classList.add('hidden'); };
+  if(store.get('noinst', false)) return;
+  addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); ev=e; box.classList.remove('hidden'); });
+  setTimeout(()=>box.classList.remove('hidden'), ios ? 0 : 1500);
+  btn.onclick = async ()=>{
+    if(!ev){ apriGuida(); return; }
+    ev.prompt(); let ok=false; try{ ok = (await ev.userChoice).outcome==='accepted'; }catch(e){}
+    ev=null; if(ok) box.classList.add('hidden');
+  };
   document.getElementById('instx').onclick = ()=>{ box.classList.add('hidden'); store.set('noinst', true); };
   addEventListener('appinstalled', ()=>box.classList.add('hidden'));
+  window.apriGuida = apriGuida;
 })();
 if('serviceWorker' in navigator && location.protocol==='https:' && !/claude\.ai|claudeusercontent/.test(location.host)){ try{ navigator.serviceWorker.register('sw.js'); }catch(e){} }
 </script>
