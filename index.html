@@ -411,7 +411,7 @@ function renderList(){
       `</div><div class="sec">Altro</div><div class="menu small">`+
       MENU_ALTRO.map(k=>btnHTML(MENUS[k].title, MENUS[k].hint, '#'+k)).join('')+
       `</div>`;
-    h += `<div class="foot"><a href="${AUDIO}" target="_blank" rel="noopener">File audio (Google Drive)</a><br>Testi dal libretto «Inni»</div>`;
+    h += `<div class="foot"><a href="${AUDIO}" target="_blank" rel="noopener">File audio (Google Drive)</a><br>Libretto: <a href="libretto-inni.pdf">PDF</a> · <a href="libretto-inni.epub">ePub</a><br>Testi dal libretto «Inni»</div>`;
     res.innerHTML = h; return;
   }
   // ricerca: numero di pagina o parole
