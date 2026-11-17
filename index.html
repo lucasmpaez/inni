@@ -146,6 +146,7 @@ html.dark .gok{color:#1a1715}
 .menu .btn{border:1px solid var(--line);box-shadow:none;padding:14px 16px;margin-top:10px}
 .menu.small .btn .o{font-size:20px}
 .today .tl{color:var(--accent);font-style:italic;font-family:var(--serif);font-size:18px;margin:-4px 0 4px}
+.sep{border:0;border-top:2px solid var(--line);margin:22px 8px 4px}
 .hidden{display:none!important}
 </style>
 </head>
@@ -349,10 +350,12 @@ function renderList(){
         `</div>`;
     }
     const prim = pasq ? [regina, angelus] : [angelus, regina];
-    const freq = pasq ? [regina, christe, angelus] : [angelus, christe, regina];
-    h += `<div class="menu">`+
-      freq.filter(Boolean).map(c=>btnHTML(c.title, c.sec==='Preghiere'?'Preghiera':'Inno', '#'+c.id)).join('')+
-      `</div><div class="menu">`+
+    const memorare = find(c=>c.title==='Memorare');
+    const freq = [pasq ? regina : angelus, memorare, christe];
+    const altra = pasq ? angelus : regina;
+    const bp = c=>btnHTML(c.title, c.sec==='Preghiere'?'Preghiera':'Inno', '#'+c.id);
+    h += `<div class="menu">`+ freq.filter(Boolean).map(bp).join('') +
+      `</div><hr class="sep"><div class="menu">`+ (altra ? bp(altra) : '') +
       MENU_HOME.map(k=>btnHTML(MENUS[k].title, (tl ? k===tl.toLowerCase() : k==='anno') ? 'Tempo attuale' : MENUS[k].hint, '#'+k)).join('')+
       `</div><div class="sec">Altro</div><div class="menu small">`+
       MENU_ALTRO.map(k=>btnHTML(MENUS[k].title, MENUS[k].hint, '#'+k)).join('')+
