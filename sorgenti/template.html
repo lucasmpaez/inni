@@ -145,6 +145,7 @@ html.dark .gok{color:#1a1715}
 .menu{margin:18px 0 0}
 .menu .btn{border:1px solid var(--line);box-shadow:none;padding:14px 16px;margin-top:10px}
 .menu.small .btn .o{font-size:20px}
+.today .tl{color:var(--accent);font-style:italic}
 .hidden{display:none!important}
 </style>
 </head>
@@ -200,6 +201,19 @@ function pasqua(y){ // data di Pasqua (calendario gregoriano)
 function tempoPasquale(d){ // da Pasqua a Pentecoste inclusa
   const t=new Date(d.getFullYear(),d.getMonth(),d.getDate()), p=pasqua(d.getFullYear());
   const diff=(t-p)/864e5; return diff>=0 && diff<=49;
+}
+function tempoLiturgico(d){ // 'AVVENTO' | 'NATALE' | 'QUARESIMA' | 'PASQUA' | null (tempo ordinario)
+  const y=d.getFullYear(), t=new Date(y,d.getMonth(),d.getDate()), D=864e5;
+  const natale=new Date(y,11,25);
+  const avv=new Date(y,11,25-((natale.getDay()||7)+21));        // 4ª domenica prima di Natale
+  if(t>=avv && t<natale) return 'AVVENTO';
+  if(t>=natale) return 'NATALE';
+  const ep=new Date(y,0,6), batt=new Date(y,0,6+(7-ep.getDay()||7)); // Battesimo del Signore: domenica dopo l'Epifania
+  if(t<=batt) return 'NATALE';
+  const p=pasqua(y), diff=Math.round((t-p)/D);
+  if(diff>=-46 && diff<0) return 'QUARESIMA';                        // dal Mercoledì delle Ceneri
+  if(diff>=0 && diff<=49) return 'PASQUA';                           // fino a Pentecoste
+  return null;
 }
 const byId = Object.fromEntries(CANTI.map(c=>[c.id,c]));
 
@@ -308,23 +322,24 @@ function renderList(){
     const g = GIORNI[new Date().getDay()];
     const sab = g==='SABATO';
     const find = f=>CANTI.find(f);
+    const tl = tempoLiturgico(new Date()), lg = tl || g;
     const oggi = [
-      ['Lodi', find(c=>c.name===g && c.ora==='Lodi')],
+      ['Lodi', find(c=>c.name===lg && c.ora==='Lodi')],
       ['Ora media', sab ? find(c=>c.name==='OMNI DIE') : find(c=>c.name==='ORA MEDIA')],
-      ['Vespri', find(c=>c.name===g && c.ora==='Vespri')],
+      ['Vespri', find(c=>c.name===lg && c.ora==='Vespri')],
       ['Compieta', sab ? find(c=>c.name==='O SPES MEA CARA') : find(c=>c.name==='COMPIETA' && c.sec!=='Preghiere')]
     ].filter(x=>x[1]);
     const pasq = tempoPasquale(new Date());
     const angelus = find(c=>c.title==='Angelus'), regina = find(c=>c.title.startsWith('Reg')), christe = find(c=>c.name==='CHRISTE CUNCTORUM');
     let h = '';
     if(oggi.length){
-      h += `<div class="today"><div class="lab">Oggi</div><div class="day">${g.charAt(0)+g.slice(1).toLowerCase()}</div>`+
+      h += `<div class="today"><div class="lab">Oggi</div><div class="day">${g.charAt(0)+g.slice(1).toLowerCase()}${tl?` · <span class="tl">Tempo di ${tl.charAt(0)+tl.slice(1).toLowerCase()}</span>`:''}</div>`+
         oggi.map(([o,c])=>`<a href="#${c.id}"><span class="o">${esc(o)}</span><span class="t">${esc(c.title)}</span><span class="go">›</span></a>`).join('')+
         `</div>`;
     }
     const prim = pasq ? [regina, angelus] : [angelus, regina];
     h += `<div class="menu">`+
-      MENU_HOME.map(k=>btnHTML(MENUS[k].title, MENUS[k].hint, '#'+k)).join('')+
+      MENU_HOME.map(k=>btnHTML(MENUS[k].title, (tl ? k===tl.toLowerCase() : k==='anno') ? 'Tempo attuale' : MENUS[k].hint, '#'+k)).join('')+
       `</div><div class="menu">`+
       [...prim, christe].filter(Boolean).map(c=>btnHTML(c.title, c.sec==='Preghiere'?'Preghiera':'Inno', '#'+c.id)).join('')+
       `</div><div class="sec">Altro</div><div class="menu small">`+
