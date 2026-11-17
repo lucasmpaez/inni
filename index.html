@@ -158,6 +158,15 @@ html.dark .gok{color:#1a1715}
 .menu.small .btn .o{font-size:20px}
 .today .tl{color:var(--accent);font-style:italic;font-family:var(--serif);font-size:18px;margin:-4px 0 4px}
 .sep{border:0;border-top:2px solid var(--line);margin:22px 8px 4px}
+.zopts{display:flex;flex-direction:column;gap:10px}
+.zopts.two{flex-direction:row}
+.zopt{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border:2px solid var(--line);border-radius:14px;padding:12px;font-family:var(--serif);font-weight:600;background:var(--card)}
+.zopt svg{width:22px;height:22px}
+.zopt.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.sz{display:flex;align-items:center;justify-content:center;gap:16px;margin:8px 0 4px;font-size:15px;color:var(--muted)}
+.szb{width:52px;height:52px;border-radius:26px;background:var(--accent);color:#fff;font-size:30px;font-weight:600;line-height:1}
+html.dark .szb{color:#1a1715}
+.pscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .hidden{display:none!important}
 </style>
 </head>
@@ -176,6 +185,7 @@ html.dark .gok{color:#1a1715}
     <button class="gok" id="gok">Ho capito</button>
   </div>
 </div>
+<div class="guide hidden" id="sett" role="dialog" aria-modal="true"></div>
 <div class="inst hidden" id="inst">
   <div class="it"><b>Installa l'app</b><span id="insttxt">Sul telefono, anche senza internet</span></div>
   <button class="ibtn" id="instbtn">Installa</button>
@@ -244,9 +254,10 @@ const store = {
   get(k,d){ try{ const v=localStorage.getItem('inni.'+k); return v===null?d:JSON.parse(v);}catch(e){return d;} },
   set(k,v){ try{ localStorage.setItem('inni.'+k, JSON.stringify(v)); }catch(e){} }
 };
-let fs = store.get('fs', 20), dark = store.get('dark', null), view = store.get('view', 'testo'), query = '';
+let zoom = store.get('zoom', 1), szoom = 1, fs = store.get('fs', 20), dark = store.get('dark', null), view = store.get('view', 'testo'), query = '';
 function applyPrefs(){
   document.documentElement.style.setProperty('--fs', fs+'px');
+  document.documentElement.style.zoom = zoom;
   const d = dark===null ? matchMedia('(prefers-color-scheme: dark)').matches : dark;
   document.documentElement.classList.toggle('dark', d);
   const c = coloreLiturgico(new Date());
@@ -282,13 +293,27 @@ const fullText = c => [c.title, c.sub, ...c.blocks.flatMap(b=>(b.lines||[]).map(
 CANTI.forEach(c=>{ c._t = fullText(c); c._n = norm(c._t); });
 
 function themeBtn(){
-  const isDark = document.documentElement.classList.contains('dark');
-  return `<button class="ib" id="theme" aria-label="Tema">${isDark?ICON.sun:ICON.moon}</button>`;
+  return `<button class="ib txt" id="theme" aria-label="Dimensione e tema" style="font-size:20px">Aa</button>`;
 }
 function bindTheme(){
-  document.getElementById('theme').onclick = ()=>{
-    dark = !document.documentElement.classList.contains('dark'); store.set('dark', dark); applyPrefs(); route();
-  };
+  document.getElementById('theme').onclick = apriImpostazioni;
+}
+const ZOOMS = [[1,'Normale'],[1.2,'Grande'],[1.4,'Molto grande']];
+function apriImpostazioni(){
+  const isDark = document.documentElement.classList.contains('dark');
+  const s = document.getElementById('sett');
+  s.innerHTML = `<div class="gcard">
+    <div class="gtitle">Dimensione</div>
+    <div class="gsub">Ingrandisce tutta l'app: testi, titoli e pulsanti.</div>
+    <div class="zopts">${ZOOMS.map(([z,l],i)=>`<button class="zopt${z===zoom?' on':''}" data-z="${z}" style="font-size:${19+i*4}px">${l}</button>`).join('')}</div>
+    <div class="gtitle" style="font-size:22px;margin-top:18px">Tema</div>
+    <div class="zopts two"><button class="zopt${!isDark?' on':''}" data-d="0">${ICON.sun} Chiaro</button><button class="zopt${isDark?' on':''}" data-d="1">${ICON.moon} Scuro</button></div>
+    <button class="gok" id="sok" style="margin-top:18px">Fatto</button></div>`;
+  s.classList.remove('hidden');
+  s.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{ zoom=+b.dataset.z; store.set('zoom', zoom); applyPrefs(); apriImpostazioni(); });
+  s.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{ dark = b.dataset.d==='1'; store.set('dark', dark); applyPrefs(); apriImpostazioni(); });
+  document.getElementById('sok').onclick = ()=>{ s.classList.add('hidden'); route(); };
+  s.onclick = e=>{ if(e.target===s){ s.classList.add('hidden'); route(); } };
 }
 
 function itemHTML(c, snip){
@@ -452,13 +477,18 @@ function renderCanto(c){
     ${tabs.length>1?`<div class="tabs">${tabs.map(([k,l])=>`<button data-v="${k}" class="${v===k?'on':''}">${l}</button>`).join('')}</div>`:''}
     <div class="text pane" data-p="testo">${main.map(blockHTML).join('')}</div>
     <div class="text pane" data-p="traduzione">${trad.map(blockHTML).join('')}</div>
-    <div class="pages pane" data-p="spartito" id="vs"></div>
+    <div class="pane" data-p="spartito"><div class="sz"><button class="szb" id="szm" aria-label="Rimpicciolisci">−</button><span id="szl">Zoom 100%</span><button class="szb" id="szp" aria-label="Ingrandisci">+</button></div>
+      <div class="pscroll"><div class="pages" id="vs"></div></div></div>
     <a class="home" href="#${lastMenu}">${ICON.back} ${lastMenu?'Indietro':"Torna all'indice"}</a>`;
   const show = k=>{
     m.querySelectorAll('.pane').forEach(p=>p.classList.toggle('hidden', p.dataset.p!==k));
     m.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on', x.dataset.v===k));
     const vs = document.getElementById('vs');
     if(k==='spartito' && !vs.innerHTML) vs.innerHTML = c.pdfpages.map(p=>`<img alt="Pagina ${p-1}" src="${IMGS[p]}">`).join('');
+    const setSz = ()=>{ vs.style.width = (szoom*100)+'%'; document.getElementById('szl').textContent = 'Zoom '+Math.round(szoom*100)+'%'; };
+    setSz();
+    document.getElementById('szp').onclick = ()=>{ szoom = Math.min(3, szoom+0.5); setSz(); };
+    document.getElementById('szm').onclick = ()=>{ szoom = Math.max(1, szoom-0.5); setSz(); };
     document.getElementById('fm').classList.toggle('hidden', k==='spartito');
     document.getElementById('fp').classList.toggle('hidden', k==='spartito');
   };
