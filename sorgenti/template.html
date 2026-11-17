@@ -349,10 +349,11 @@ function renderList(){
         `</div>`;
     }
     const prim = pasq ? [regina, angelus] : [angelus, regina];
+    const freq = pasq ? [regina, christe, angelus] : [angelus, christe, regina];
     h += `<div class="menu">`+
-      MENU_HOME.map(k=>btnHTML(MENUS[k].title, (tl ? k===tl.toLowerCase() : k==='anno') ? 'Tempo attuale' : MENUS[k].hint, '#'+k)).join('')+
+      freq.filter(Boolean).map(c=>btnHTML(c.title, c.sec==='Preghiere'?'Preghiera':'Inno', '#'+c.id)).join('')+
       `</div><div class="menu">`+
-      [...prim, christe].filter(Boolean).map(c=>btnHTML(c.title, c.sec==='Preghiere'?'Preghiera':'Inno', '#'+c.id)).join('')+
+      MENU_HOME.map(k=>btnHTML(MENUS[k].title, (tl ? k===tl.toLowerCase() : k==='anno') ? 'Tempo attuale' : MENUS[k].hint, '#'+k)).join('')+
       `</div><div class="sec">Altro</div><div class="menu small">`+
       MENU_ALTRO.map(k=>btnHTML(MENUS[k].title, MENUS[k].hint, '#'+k)).join('')+
       `</div>`;
