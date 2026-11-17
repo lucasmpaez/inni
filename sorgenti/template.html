@@ -24,6 +24,15 @@ html.dark{
   --bg:#171513; --card:#211e1b; --ink:#ece6dd; --muted:#9a9187; --line:#34302b;
   --accent:#e08a7c; --accent-soft:#3a2522; --trad:#bdb4a9;
 }
+/* colori liturgici */
+html[data-c=viola]{--accent:#5e2d8a;--accent-soft:#ece3f4}
+html[data-c=bianco]{--accent:#94700f;--accent-soft:#f5ecd2}
+html[data-c=rosso]{--accent:#c01c1c;--accent-soft:#f8e0dd}
+html[data-c=rosa]{--accent:#b04f7c;--accent-soft:#f7e2ec}
+html.dark[data-c=viola]{--accent:#b89ce2;--accent-soft:#2b2238}
+html.dark[data-c=bianco]{--accent:#e1c26e;--accent-soft:#322a17}
+html.dark[data-c=rosso]{--accent:#f07a6c;--accent-soft:#3b1f1c}
+html.dark[data-c=rosa]{--accent:#e79bbd;--accent-soft:#3a2230}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
 body{font-family:var(--sans);min-height:100vh;
@@ -238,6 +247,21 @@ function applyPrefs(){
   document.documentElement.style.setProperty('--fs', fs+'px');
   const d = dark===null ? matchMedia('(prefers-color-scheme: dark)').matches : dark;
   document.documentElement.classList.toggle('dark', d);
+  const c = coloreLiturgico(new Date());
+  if(c) document.documentElement.dataset.c = c; else delete document.documentElement.dataset.c;
+  const mc = document.querySelector('meta[name=theme-color]');
+  if(mc) mc.content = {viola:'#5e2d8a', bianco:'#94700f', rosso:'#c01c1c', rosa:'#b04f7c'}[c] || '#7a1f1f';
+}
+function coloreLiturgico(d){ // colore del giorno secondo il Messale (tempo ordinario: bordeaux dell'app)
+  const y=d.getFullYear(), t=new Date(y,d.getMonth(),d.getDate()), D=864e5, p=pasqua(y);
+  const diff=Math.round((t-p)/D);
+  const natale=new Date(y,11,25), avv=new Date(y,11,25-((natale.getDay()||7)+21));
+  if(diff===49 || diff===-2) return 'rosso';                          // Pentecoste, Venerdì Santo
+  if(diff===-21 || Math.round((t-avv)/D)===14) return 'rosa';         // Laetare, Gaudete
+  const tl = tempoLiturgico(d);
+  if(tl==='AVVENTO' || tl==='QUARESIMA') return 'viola';
+  if(tl==='NATALE' || tl==='PASQUA') return 'bianco';
+  return null;
 }
 applyPrefs();
 
