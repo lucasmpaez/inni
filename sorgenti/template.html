@@ -25,6 +25,8 @@ html.dark{
   --accent:#e08a7c; --accent-soft:#3a2522; --trad:#bdb4a9;
 }
 /* colori liturgici */
+html[data-c=verde]{--accent:#2f6b3a;--accent-soft:#e2eee3}
+html.dark[data-c=verde]{--accent:#8fcf98;--accent-soft:#1e2d20}
 html[data-c=viola]{--accent:#5e2d8a;--accent-soft:#ece3f4}
 html[data-c=bianco]{--accent:#94700f;--accent-soft:#f5ecd2}
 html[data-c=rosso]{--accent:#c01c1c;--accent-soft:#f8e0dd}
@@ -250,7 +252,7 @@ function applyPrefs(){
   const c = coloreLiturgico(new Date());
   if(c) document.documentElement.dataset.c = c; else delete document.documentElement.dataset.c;
   const mc = document.querySelector('meta[name=theme-color]');
-  if(mc) mc.content = {viola:'#5e2d8a', bianco:'#94700f', rosso:'#c01c1c', rosa:'#b04f7c'}[c] || '#7a1f1f';
+  if(mc) mc.content = {verde:'#2f6b3a', viola:'#5e2d8a', bianco:'#94700f', rosso:'#c01c1c', rosa:'#b04f7c'}[c] || '#7a1f1f';
 }
 function coloreLiturgico(d){ // colore del giorno secondo il Messale (tempo ordinario: bordeaux dell'app)
   const y=d.getFullYear(), t=new Date(y,d.getMonth(),d.getDate()), D=864e5, p=pasqua(y);
@@ -261,7 +263,7 @@ function coloreLiturgico(d){ // colore del giorno secondo il Messale (tempo ordi
   const tl = tempoLiturgico(d);
   if(tl==='AVVENTO' || tl==='QUARESIMA') return 'viola';
   if(tl==='NATALE' || tl==='PASQUA') return 'bianco';
-  return null;
+  return 'verde';
 }
 applyPrefs();
 
