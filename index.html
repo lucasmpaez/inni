@@ -170,6 +170,7 @@ html.dark .gok{color:#1a1715}
 .szb{width:52px;height:52px;border-radius:26px;background:var(--accent);color:#fff;font-size:30px;font-weight:600;line-height:1}
 html.dark .szb{color:#1a1715}
 .pscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.today .salt{font-size:14px;color:var(--muted);margin:-2px 0 6px}
 .hidden{display:none!important}
 </style>
 </head>
@@ -249,6 +250,16 @@ function settimanaOrdinaria(d){ // numero della settimana del Tempo Ordinario, o
   const cristoRe=new Date(y,avv.getMonth(),avv.getDate()-7);          // XXXIV domenica
   const dom=new Date(y,t.getMonth(),t.getDate()-t.getDay());
   return 34 - Math.round((cristoRe-dom)/D)/7;                         // seconda parte: contando a ritroso
+}
+function settimanaSalterio(d){ // I–IV: ricomincia dalla I la 1ª dom. di Avvento, del T.O., di Quaresima e a Pasqua
+  const y=d.getFullYear(), t=new Date(y,d.getMonth(),d.getDate()), D=864e5;
+  const tl=tempoLiturgico(d), w=(a,b)=>Math.floor(Math.round((a-b)/D)/7);
+  const avvento=yy=>{ const n=new Date(yy,11,25); return new Date(yy,11,25-((n.getDay()||7)+21)); };
+  if(tl==='AVVENTO' || tl==='NATALE'){ const a = t>=avvento(y) ? avvento(y) : avvento(y-1); return w(t,a)%4+1; }
+  const p=pasqua(y);
+  if(tl==='QUARESIMA'){ const q1=new Date(y,p.getMonth(),p.getDate()-42); return t<q1 ? 4 : w(t,q1)%4+1; }
+  if(tl==='PASQUA') return w(t,p)%4+1;
+  return (settimanaOrdinaria(d)-1)%4+1;
 }
 function romano(n){ const v=[[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']]; let s=''; for(const [a,r] of v) while(n>=a){ s+=r; n-=a; } return s; }
 const byId = Object.fromEntries(CANTI.map(c=>[c.id,c]));
@@ -403,7 +414,7 @@ function renderList(){
     const angelus = find(c=>c.title==='Angelus'), regina = find(c=>c.title.startsWith('Reg')), christe = find(c=>c.name==='CHRISTE CUNCTORUM');
     let h = '';
     if(oggi.length){
-      h += `<div class="today"><div class="lab">Oggi</div><div class="day">${g.charAt(0)+g.slice(1).toLowerCase()}</div><div class="tl">${tl ? 'Tempo di '+tl.charAt(0)+tl.slice(1).toLowerCase() : romano(settimanaOrdinaria(new Date()))+' settimana del Tempo Ordinario'}</div>`+
+      h += `<div class="today"><div class="lab">Oggi</div><div class="day">${g.charAt(0)+g.slice(1).toLowerCase()}</div><div class="tl">${tl ? 'Tempo di '+tl.charAt(0)+tl.slice(1).toLowerCase() : romano(settimanaOrdinaria(new Date()))+' settimana del Tempo Ordinario'}</div><div class="salt">Salterio: ${romano(settimanaSalterio(new Date()))} settimana</div>`+
         oggi.map(([o,c])=>`<a href="#${c.id}"><span class="o">${esc(o)}</span><span class="t">${esc(c.title)}</span><span class="go">›</span></a>`).join('')+
         `</div>`;
     }
