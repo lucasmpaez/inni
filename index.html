@@ -55,6 +55,9 @@ a{color:inherit}
 .ib.txt{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink)}
 
 /* ricerca */
+.homecol{display:flex;flex-direction:column}
+.homecol #res{order:1}.homecol #sb{order:2;margin-top:26px}.homecol #foot{order:3}
+.homecol.cerca #sb{order:0;margin-top:14px}.homecol.cerca #foot{display:none}
 .search{position:relative;margin:14px 0 6px}
 .search input{width:100%;font:inherit;font-size:17px;padding:13px 40px 13px 44px;border-radius:14px;
   border:1px solid var(--line);background:var(--card);color:var(--ink);outline:none}
@@ -366,15 +369,19 @@ function renderHome(){
   document.getElementById('bar').innerHTML = `<h1>INNI</h1>${themeBtn()}`;
   bindTheme();
   const m = document.getElementById('main');
-  m.innerHTML = `
+  m.innerHTML = `<div class="homecol${query?' cerca':''}" id="hc">
+    <div id="res"></div>
     <div class="search${query?' has':''}" id="sb">${ICON.search}
       <input id="q" type="search" placeholder="Cerca titolo, parole o pagina…" value="${esc(query)}" autocomplete="off" enterkeyhint="search">
       <button class="ib clr" id="clr" aria-label="Cancella">${ICON.x}</button>
     </div>
-    <div id="res"></div>`;
+    <div class="foot" id="foot"><a href="${AUDIO}" target="_blank" rel="noopener">File audio (Google Drive)</a><br>Testi dal libretto «Inni»</div></div>`;
   const q = document.getElementById('q');
-  q.oninput = ()=>{ query = q.value; document.getElementById('sb').classList.toggle('has', !!query); renderList(); };
-  document.getElementById('clr').onclick = ()=>{ query=''; q.value=''; document.getElementById('sb').classList.remove('has'); renderList(); q.focus(); };
+  const hc = document.getElementById('hc');
+  q.oninput = ()=>{ const prima = !query; query = q.value; document.getElementById('sb').classList.toggle('has', !!query);
+    hc.classList.toggle('cerca', !!query); renderList(); if(prima && query) scrollTo(0,0); };
+  q.onfocus = ()=>{ if(!query) setTimeout(()=>q.scrollIntoView({block:'center'}), 300); };
+  document.getElementById('clr').onclick = ()=>{ query=''; q.value=''; document.getElementById('sb').classList.remove('has'); hc.classList.remove('cerca'); renderList(); };
   renderList();
 }
 
@@ -411,7 +418,6 @@ function renderList(){
       `</div><div class="sec">Altro</div><div class="menu small">`+
       MENU_ALTRO.map(k=>btnHTML(MENUS[k].title, MENUS[k].hint, '#'+k)).join('')+
       `</div>`;
-    h += `<div class="foot"><a href="${AUDIO}" target="_blank" rel="noopener">File audio (Google Drive)</a><br>Testi dal libretto «Inni»</div>`;
     res.innerHTML = h; return;
   }
   // ricerca: numero di pagina o parole
